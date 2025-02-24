@@ -1,14 +1,3 @@
-use ElaginDiplom;
-show tables;
-drop table Clients;
-drop table Employees;
-drop table Status_order;
-drop table Info_orders;
-drop table Products;
-drop table Warehouses;
-drop table Couriers;
-
-
 
 create table Status_order(
 id_status INT primary key auto_increment,
@@ -47,20 +36,20 @@ description_order varchar(200),
 price_delivery int not null
 );
 
-create table Couriers(
-id_courier int primary key auto_increment,
-first_name varchar(100) not null,
-last_name varchar(100) not null
-);
-
 create table Warehouses(
 id_warehouse INT primary key auto_increment,
 id_employee INT not null,
-id_courier INT not null,
 foreign key (id_employee) references Employees (id_employee), 
-foreign key (id_courier) references Couriers (id_courier),
 name_warehouse varchar(50),
 address_warehouse varchar(50)
+);
+
+create table Couriers(
+id_courier int primary key auto_increment,
+first_name varchar(100) not null,
+last_name varchar(100) not null,
+id_warehouse int not null,
+foreign key (id_warehouse) references Warehouses(id_warehouse)
 );
 
 create table Products(

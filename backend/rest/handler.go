@@ -39,7 +39,6 @@ func AllCouriers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 	}
-	
 	couriersJSON, err := json.Marshal(couriers)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -50,6 +49,20 @@ func AllCouriers(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func AddCourier(w http.ResponseWriter, r *http.Request){
-	
+func AddCourier(w http.ResponseWriter, r *http.Request) {
+	var courier or.Courier
+	err := json.NewDecoder(r.Body).Decode(&courier)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	err = or.AddCourier(&courier)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Courier added successfully"})
 }

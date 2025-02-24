@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: ElaginDiplom       
+      MYSQL_DATABASE: Elagin     
     ports:
       - '3306:3306' # my local port : container port
     volumes:

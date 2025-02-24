@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startDate();
     }
     else if (window.location.href.includes("/couriers")) {
-        ShowCourier();
+        ShowCouriers();
     }
     else if (window.location.href.includes("/products")) {
         showProducts();
@@ -85,25 +85,31 @@ document.getElementById('addCourierForm').addEventListener('submit', function(ev
 
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
-
-    fetch('http://localhost/couriers', {
+    const id_warehouse = document.getElementById('id_warehouse').value;
+    
+    fetch('http://localhost/courierAdd', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ first_name: firstName, last_name: lastName })
+        body: JSON.stringify({ id_courier: 0, first_name: firstName, last_name: lastName, total_salary: 0, warehouse_name: "warehouse", id_warehouse: Number(id_warehouse)})
     })
     .then(response => response.json())
     .then(data => {
         console.log('Courier added:', data);
         // Обновляем таблицу
-        const tableBody = document.getElementById('customer-table');
-        tableBody.innerHTML += `<tr><td>${firstName} ${lastName}</td></tr>`;
+        /*const tableBody = document.getElementById('customer-table');
+        tableBody.innerHTML += `<tr><td>${firstName} ${lastName}</td> <td> ${0} </td> <td>${String(id_warehouse)}</td></tr>`;*/
+        ShowCouriers()
     })
-    .catch(error => console.error('Error adding courier:', error));
+    .catch(error => {
+        console.error('Error adding courier:', error)
+        return;
+    });
+    alert("Courier added successfully")
 });
 
-function ShowCourier(){
+function ShowCouriers(){
     fetch('http://localhost/couriers', {
         method: 'GET',
         headers: {
@@ -113,6 +119,7 @@ function ShowCourier(){
     .then(response => response.json())
     .then(couriers => {
         const tableBody = document.getElementById('customer-table');
+        tableBody.innerHTML = "";
         couriers.forEach(courier => {
             tableBody.innerHTML += `<tr><td>${courier.first_name} ${courier.last_name}</td> <td>${courier.warehouse_name}</td> <td>${courier.total_salary}</td> </tr>`;
         });

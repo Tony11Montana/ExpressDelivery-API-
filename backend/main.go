@@ -12,11 +12,12 @@ import (
 
 func main() {
 
-	db.InitDB("root:admin@tcp(127.0.0.1:3306)/ElaginDiplom")
+	db.InitDB("root:admin@tcp(127.0.0.1:3306)/Elagin")
 
 	router := mux.NewRouter()
 	router.HandleFunc("/orders", rest.AllOrder).Methods("GET")
 	router.HandleFunc("/couriers", rest.AllCouriers).Methods("GET")
+	router.HandleFunc("/courierAdd", rest.AddCourier).Methods("POST")
 
 	http.ListenAndServe(":80",
 		handlers.CORS(
