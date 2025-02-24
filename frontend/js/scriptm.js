@@ -5,10 +5,33 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (window.location.href.includes("/couriers")) {
         ShowCourier();
     }
+    else if (window.location.href.includes("/products")) {
+        showProducts();
+    }
 });
 
 let orders = [];
 
+function showProducts(){
+    fetch('http://localhost/products', {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(couriers => {
+        const tableBody = document.getElementById('products-container');
+        couriers.forEach(courier => {
+        tableBody.innerHTML += `<div class="product-card">
+            <div class="product-name">${product_name}</div>
+            <div class="product-description">${product_description}</div>
+            <div class="product-price">${product_price}</div> </div>`;
+        });
+    })
+    .catch(error => console.error('Error fetching couriers:', error));
+
+}
 
 function startDate(){
     let options = {
@@ -32,6 +55,7 @@ function startDate(){
         console.error('There has been a problem with your fetch operation:', error);
     });
 }
+
 function showOrders(jsonOrders)
 {
     table = document.getElementById('customer-table');
@@ -90,7 +114,7 @@ function ShowCourier(){
     .then(couriers => {
         const tableBody = document.getElementById('customer-table');
         couriers.forEach(courier => {
-            tableBody.innerHTML += `<tr><td>${courier.first_name} ${courier.last_name}</td></tr>`;
+            tableBody.innerHTML += `<tr><td>${courier.first_name} ${courier.last_name}</td> <td>${courier.warehouse_name}</td> <td>${courier.total_salary}</td> </tr>`;
         });
     })
     .catch(error => console.error('Error fetching couriers:', error));

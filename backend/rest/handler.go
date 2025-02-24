@@ -8,10 +8,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func Hi(w http.ResponseWriter, r *http.Request) {
+func AllOrder(w http.ResponseWriter, r *http.Request) {
 
-	//w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "text/plain")
 
 	orders, err := or.GetAllOrder()
 
@@ -27,4 +27,29 @@ func Hi(w http.ResponseWriter, r *http.Request) {
 	w.Write(ors)
 	//fmt.Fprintf(w, "Hi, server!")
 
+}
+
+func AllCouriers(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "text/plain")
+
+	couriers, err := or.GetAllCouriers()
+
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+	}
+	
+	couriersJSON, err := json.Marshal(couriers)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Write(couriersJSON)
+	//fmt.Fprintf(w, "Hi, server!")
+
+}
+
+func AddCourier(w http.ResponseWriter, r *http.Request){
+	
 }
