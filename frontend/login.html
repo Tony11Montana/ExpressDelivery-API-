@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e3f2fd; /* Свежий голубой фон */
+            font-family: 'Arial', sans-serif;
+        }
+
+        .auth-card {
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            background-color: #ffffff;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .auth-title {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #3f51b5; /* Темно-синий цвет заголовка */
+        }
+
+        .tabs {
+            background-color: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .form-content {
+            display: none;
+            padding: 1rem 0;
+        }
+
+        .form-content.active {
+            display: block;
+        }
+
+        .input-field input {
+            border-bottom: 2px solid #3f51b5; /* Синяя линия под полями ввода */
+        }
+
+        .input-field input:focus {
+            border-bottom: 2px solid #1976d2; /* Более яркая линия при фокусе */
+        }
+
+        .btn {
+            background-color: #3f51b5; /* Синий цвет кнопок */
+            border-radius: 20px;
+        }
+
+        .btn:hover {
+            background-color: #1976d2; /* Темнее при наведении */
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .link-text a {
+            color: #3f51b5;
+            text-decoration: none;
+        }
+
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-card">
+        <h5 class="auth-title">ExpressDelivery</h5>
+        <div id="login" class="form-content active">
+            <form id="login-form">
+                <div class="input-field">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="input-field">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn waves-effect waves-light">Login</button>
+            </form>
+        </div>
+
+        <div id="register" class="form-content">
+            <form id="registration-form">
+                <div class="input-field">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" required>
+                </div>
+
+                <div class="input-field">
+                    <label for="register-password">Password</label>
+
+                    <input type="password" id="register-password" required>
+                </div>
+                <div class="input-field">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <button type="submit" class="btn waves-effect waves-light">Register</button>
+            </form>
+        </div>
+
+        <p class="link-text">
+            <span id="switch-text">Don't have an account? <a href="#register" onclick="showForm('register')">Register here</a></span>
+        </p>
+    </div>
+
+    <script>
+        function showForm(formType) {
+            const loginForm = document.getElementById('login');
+            const registerForm = document.getElementById('register');
+            loginForm.classList.remove('active');
+            registerForm.classList.remove('active');
+
+            if (formType === 'login') {
+                loginForm.classList.add('active');
+                document.getElementById('switch-text').innerHTML = "Don't have an account? <a href='#register' onclick='showForm(\"register\")'>Register here</a>";
+            } else {
+                registerForm.classList.add('active');
+                document.getElementById('switch-text').innerHTML = "Already have an account? <a href='#login' onclick='showForm(\"login\")'>Login here</a>";
+            }
+        }
+
+        // Убираем подсказку при вводе
+        const inputs = document.querySelectorAll('.input-field input');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const label = this.previousElementSibling; // Получаем соответствующую метку
+                if (this.value) {
+                    label.classList.add('active'); // Добавляем класс для поднятия метки
+                } else {
+                    label.classList.remove('active'); // Убираем класс, если поле пустое
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                const label = this.previousElementSibling; // Получаем соответствующую метку
+                label.classList.add('active'); // Добавляем класс для поднятия метки при фокусе
+            });
+
+            input.addEventListener('blur', function() {
+                const label = this.previousElementSibling; // Получаем соответствующую метку
+                if (!this.value) {
+                    label.classList.remove('active'); // Убираем класс, если поле пустое
+                }
+            });
+        });
+    </script>
+</body>
+</html>
