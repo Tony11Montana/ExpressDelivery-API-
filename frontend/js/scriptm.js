@@ -1,6 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     if (window.location.href.includes("/orders")) {
-        startDate();
+        
+        if (localStorage.getItem('jwtToken') !== null)
+            startDate();
+        else {
+            window.location.href = 'login.html'
+        }
+
     }
     else if (window.location.href.includes("/couriers")) {
         ShowCouriers();
