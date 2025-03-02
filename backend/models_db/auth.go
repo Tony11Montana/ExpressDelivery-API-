@@ -34,7 +34,7 @@ func CheckUser(user *User) (bool, error) {
 	return false, err
 
 }
-func AddUser(user *User) (err error){
+func AddUser(user *User) (err error) {
 	_, err = db.Exec(`insert into Clients(login,password) values(?, ?)`, &user.Login_user, &user.Password_user)
 	if err != nil {
 		log.Fatal(err)

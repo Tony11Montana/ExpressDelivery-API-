@@ -91,7 +91,7 @@
                     <label for="login-password">Password</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" class="btn waves-effect waves-light">Login</button>
+                <button type="submit" id="sign_in" class="btn waves-effect waves-light">Login</button>
             </form>
         </div>
 
@@ -116,7 +116,7 @@
         </div>
 
         <p class="link-text">
-            <span id="switch-text">Don't have an account? <a href="#register" onclick="showForm('register')">Register here</a></span>
+            <span id="switch-text">Don't have an account? <a href="#register">Register here</a></span>
         </p>
     </div>
 
@@ -160,6 +160,30 @@
                 }
             });
         });
+        
+    document.getElementById('login-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем перезагрузку страницы
+
+    const login = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+
+    fetch('http://localhost/login', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ login: login, password: password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const token = data.token;
+        // Сохранение токена в localStorage
+        localStorage.setItem('jwtToken', token);
+    })
+    .catch(error =>{ 
+    console.error('Error logging in:', error);
+    alert("Error logging in")});
+});
     </script>
 </body>
 </html>

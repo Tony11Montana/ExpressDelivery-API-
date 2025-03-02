@@ -70,7 +70,7 @@ func AddCourier(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Courier added successfully"})
 }
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var user or.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -80,7 +80,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Проверка учетных данных
 	check, err := or.CheckUser(&user)
-	if err != nil && !check {
+	if err != nil || !check {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

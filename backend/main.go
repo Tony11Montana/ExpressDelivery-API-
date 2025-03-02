@@ -18,6 +18,7 @@ func main() {
 	router.HandleFunc("/orders", rest.AllOrder).Methods("GET")
 	router.HandleFunc("/couriers", rest.AllCouriers).Methods("GET")
 	router.HandleFunc("/courierAdd", rest.AddCourier).Methods("POST")
+	router.HandleFunc("/login", rest.LoginHandler)
 
 	http.ListenAndServe(":80",
 		handlers.CORS(
