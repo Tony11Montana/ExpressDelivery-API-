@@ -3,13 +3,33 @@ package rest
 import (
 	or "backend/models_db"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var jwtKey = []byte("Elagin_diplom")
+
+func ParseJWTToken(tokenString string, signingKey []byte) (string, string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &or.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing mwthod : %v", token.Header["alg"])
+		}
+		return signingKey, nil
+	})
+
+	if err != nil {
+		return "", "", err
+	}
+
+	if claims, ok := token.Claims.(*or.Claims); ok && token.Valid {
+		return claims.Login_user, claims.Role, nil
+	}
+	return "", "", err
+}
 
 func AllOrder(w http.ResponseWriter, r *http.Request) {
 
@@ -86,11 +106,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Генерация JWT-токена
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"login":    user.Login_user,
-		"password": user.Password_user,
-		"role":     role,
-		//	"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &or.Claims{
+		Login_user: user.Login_user,
+		Role:       role,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+		},
 	})
 
 	tokenString, err := token.SignedString(jwtKey)
@@ -116,18 +137,20 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	check, err, role := or.CheckUser(&usr)
+	/*check, err, role := or.CheckUser(&usr)
 	if err != nil || !check {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	*/
 
 	// Генерация JWT-токена
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"login":    usr.Login_user,
-		"password": usr.Password_user,
-		"role":     role,
-		//	"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &or.Claims{
+		Login_user: usr.Login_user,
+		Role:       usr.Role_user,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+		},
 	})
 
 	tokenString, err := token.SignedString(jwtKey)

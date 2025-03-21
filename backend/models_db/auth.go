@@ -3,8 +3,15 @@ package models_db
 import (
 	"log"
 
+	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 )
+
+type Claims struct {
+	Login_user string `json:"login"`
+	Role       string `json:"role"`
+	jwt.StandardClaims
+}
 
 type User struct {
 	Login_user    string `json:"login"`
