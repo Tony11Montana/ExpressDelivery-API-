@@ -9,29 +9,38 @@ import (
 type User struct {
 	Login_user    string `json:"login"`
 	Password_user string `json:"password"`
+	Role_user     string `json:"role"`
 }
 
-func CheckUser(user *User) (bool, error) {
-	rows, err := db.Query(`select login, password from Clients where login = ?`, user.Login_user)
+func CheckUser(user *User) (bool, error, string) {
+	rows, err := db.Query(`SELECT *
+							from (
+							select login, password, role 
+							from clients 
+							union all 
+							select login, password, role 
+							from employees) as Users
+							where login = ? and password = ?`, &user.Login_user, &user.Password_user)
 	if err != nil {
 		log.Fatal(err)
-		return false, err
+		return false, err, "n"
 	}
 	defer rows.Close()
 
 	var log string
 	var pass string
+	var role string
 
 	for rows.Next() {
-		err := rows.Scan(&log, &pass)
+		err := rows.Scan(&log, &pass, &role)
 		if err != nil {
-			return false, err
+			return false, err, "n"
 		}
 		if log == user.Login_user && pass == user.Password_user {
-			return true, nil
+			return true, nil, role
 		}
 	}
-	return false, err
+	return false, err, ""
 
 }
 func AddUser(user *User) (err error) {

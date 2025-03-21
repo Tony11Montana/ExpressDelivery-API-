@@ -4,7 +4,6 @@ import (
 	or "backend/models_db"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
@@ -70,6 +69,7 @@ func AddCourier(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Courier added successfully"})
 }
+
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var user or.User
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -79,7 +79,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Проверка учетных данных
-	check, err := or.CheckUser(&user)
+	check, err, role := or.CheckUser(&user)
 	if err != nil || !check {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -89,7 +89,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"login":    user.Login_user,
 		"password": user.Password_user,
-		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+		"role":     role,
+		//	"exp":      time.Now().Add(time.Hour * 72).Unix(),
 	})
 
 	tokenString, err := token.SignedString(jwtKey)
@@ -99,4 +100,71 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
+}
+func RegisterUser(w http.ResponseWriter, r *http.Request) {
+	var usr or.User
+
+	err := json.NewDecoder(r.Body).Decode(&usr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = or.AddUser(&usr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	check, err, role := or.CheckUser(&usr)
+	if err != nil || !check {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Генерация JWT-токена
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"login":    usr.Login_user,
+		"password": usr.Password_user,
+		"role":     role,
+		//	"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
+}
+func AllProducts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	products, err := or.GetAllProducts()
+
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+	}
+
+	prods, err := json.Marshal(products)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Write(prods)
+}
+func AddProduct(w http.ResponseWriter, r *http.Request) {
+	var product or.Product
+
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	err = or.AddProduct(&product)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
 }

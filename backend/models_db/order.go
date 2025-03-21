@@ -33,7 +33,7 @@ type Order struct {
 	Count_warehouse uint32 `json:"count_warehouse"`
 }
 
-func GetAllOrder() ([]*Order, error) {
+func GetAllOrder( /*user *User*/ ) ([]*Order, error) {
 
 	rows, err := db.Query(`SELECT Orders_new.id_client, concat(Clients.first_name," " ,Clients.last_name) as client_name,
 							Orders_new.price_delivery, Orders_new.type_pay, Orders_new.date_pay, Orders_new.date_order,

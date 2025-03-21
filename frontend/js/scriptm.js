@@ -26,13 +26,13 @@ function showProducts(){
         }
     })
     .then(response => response.json())
-    .then(couriers => {
+    .then(products => {
         const tableBody = document.getElementById('products-container');
-        couriers.forEach(courier => {
+        products.forEach(product => {
         tableBody.innerHTML += `<div class="product-card">
-            <div class="product-name">${product_name}</div>
-            <div class="product-description">${product_description}</div>
-            <div class="product-price">${product_price}</div> </div>`;
+            <div class="product-name">${product.Product_name}</div>
+            <div class="product-description">${product.Product_description}</div>
+            <div class="product-price">${product.Product_price}</div> </div>`;
         });
     })
     .catch(error => console.error('Error fetching couriers:', error));
@@ -43,6 +43,7 @@ function startDate(){
     let options = {
         method: 'GET',
         headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
             "Content-Type": "application/json"
         },
     }; 
