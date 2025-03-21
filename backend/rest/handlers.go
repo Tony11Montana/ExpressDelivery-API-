@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -32,11 +33,25 @@ func ParseJWTToken(tokenString string, signingKey []byte) (string, string, error
 }
 
 func AllOrder(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Content-Type", "application/json")
-	//w.Header().Set("Content-Type", "text/plain")
 
-	orders, err := or.GetAllOrder()
+	authHeader := r.Header.Get("Authorization")
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		return
+	}
+
+	tokenString := parts[1]
+
+	login, role, err := ParseJWTToken(tokenString, jwtKey)
+
+	if err != nil {
+		http.Error(w, "Invalid authorization (JWT token end or not use)", http.StatusUnauthorized)
+		return
+	}
+
+	orders, err := or.GetAllOrder(&login, &role)
 
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)

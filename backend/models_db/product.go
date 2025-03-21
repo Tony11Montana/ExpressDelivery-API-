@@ -49,6 +49,7 @@ func AddProduct(pr *Product) error {
 
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	if !rows.Next() {
