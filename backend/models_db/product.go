@@ -11,6 +11,7 @@ type Product struct {
 	Product_name        string `json: "product_name"`
 	Product_description string `json: "product_description"`
 	Product_price       int16  `json: "product_price"`
+	Product_count       uint8  `json: "product_count"`
 	Id_warehouse        uint8  `json:"id_warehouse"`
 }
 
@@ -53,7 +54,8 @@ func AddProduct(pr *Product) error {
 	}
 
 	if !rows.Next() {
-		_, err := db.Exec(`insert into products(id_warehouse,name_product,price_product,description_product) VALUES(?,?,?,?)`, &pr.Id_warehouse, &pr.Product_name, &pr.Product_price, &pr.Product_description)
+		_, err := db.Exec(`insert into products(id_warehouse,name_product,price_product,description_product,count_warehouse) VALUES(?,?,?,?,?)`,
+			&pr.Id_warehouse, &pr.Product_name, &pr.Product_price, &pr.Product_description, &pr.Product_count)
 		if err != nil {
 			log.Fatal(err)
 		}

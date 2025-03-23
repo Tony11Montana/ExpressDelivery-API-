@@ -97,6 +97,7 @@ document.getElementById('addCourierForm').addEventListener('submit', function(ev
     fetch('http://localhost/courierAdd', {
         method: 'POST',
         headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
             "Content-Type": "application/json"
         },
         body: JSON.stringify({ id_courier: 0, first_name: firstName, last_name: lastName, total_salary: 0, warehouse_name: "warehouse", id_warehouse: Number(id_warehouse)})
@@ -108,12 +109,13 @@ document.getElementById('addCourierForm').addEventListener('submit', function(ev
         /*const tableBody = document.getElementById('customer-table');
         tableBody.innerHTML += `<tr><td>${firstName} ${lastName}</td> <td> ${0} </td> <td>${String(id_warehouse)}</td></tr>`;*/
         ShowCouriers()
+        alert("Courier added successfully")
     })
     .catch(error => {
         console.error('Error adding courier:', error)
         return;
     });
-    alert("Courier added successfully")
+
 });
 
 function ShowCouriers(){

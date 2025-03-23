@@ -3,6 +3,7 @@ package rest
 import (
 	or "backend/models_db"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -32,20 +33,29 @@ func ParseJWTToken(tokenString string, signingKey []byte) (string, string, error
 	return "", "", err
 }
 
-func AllOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	authHeader := r.Header.Get("Authorization")
-	parts := strings.Split(authHeader, " ")
+func GetJWTToken(authHeader *string) (string, error) {
+	parts := strings.Split(*authHeader, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
-		return
+		return "", errors.New("invalid authorization header format")
 	}
 
 	tokenString := parts[1]
 
-	login, role, err := ParseJWTToken(tokenString, jwtKey)
+	return tokenString, nil
+}
 
+func AllOrder(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	authHeader := r.Header.Get("Authorization")
+
+	tokenString, err := GetJWTToken(&authHeader)
+	if err != nil {
+		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		return
+	}
+
+	login, role, err := ParseJWTToken(tokenString, jwtKey)
 	if err != nil {
 		http.Error(w, "Invalid authorization (JWT token end or not use)", http.StatusUnauthorized)
 		return
@@ -89,7 +99,27 @@ func AllCouriers(w http.ResponseWriter, r *http.Request) {
 
 func AddCourier(w http.ResponseWriter, r *http.Request) {
 	var courier or.Courier
-	err := json.NewDecoder(r.Body).Decode(&courier)
+
+	authHeader := r.Header.Get("Authorization")
+
+	tokenString, err := GetJWTToken(&authHeader)
+	if err != nil {
+		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		return
+	}
+
+	_, role, err := ParseJWTToken(tokenString, jwtKey)
+	if err != nil {
+		http.Error(w, "Invalid authorization (JWT token end or not use)", http.StatusUnauthorized)
+		return
+	}
+
+	if role == "client" {
+		http.Error(w, "Invalid authorization ( not enough rights )", http.StatusUnauthorized)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&courier)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
