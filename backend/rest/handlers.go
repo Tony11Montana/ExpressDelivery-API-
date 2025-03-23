@@ -98,8 +98,6 @@ func AllCouriers(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddCourier(w http.ResponseWriter, r *http.Request) {
-	var courier or.Courier
-
 	authHeader := r.Header.Get("Authorization")
 
 	tokenString, err := GetJWTToken(&authHeader)
@@ -118,6 +116,8 @@ func AddCourier(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid authorization ( not enough rights )", http.StatusUnauthorized)
 		return
 	}
+
+	var courier or.Courier
 
 	err = json.NewDecoder(r.Body).Decode(&courier)
 	if err != nil {
@@ -223,9 +223,28 @@ func AllProducts(w http.ResponseWriter, r *http.Request) {
 	w.Write(prods)
 }
 func AddProduct(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+
+	tokenString, err := GetJWTToken(&authHeader)
+	if err != nil {
+		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		return
+	}
+
+	_, role, err := ParseJWTToken(tokenString, jwtKey)
+	if err != nil {
+		http.Error(w, "Invalid authorization (JWT token end or not use)", http.StatusUnauthorized)
+		return
+	}
+
+	if role == "client" {
+		http.Error(w, "Invalid authorization ( not enough rights )", http.StatusUnauthorized)
+		return
+	}
+
 	var product or.Product
 
-	err := json.NewDecoder(r.Body).Decode(&product)
+	err = json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
