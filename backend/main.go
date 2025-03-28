@@ -21,6 +21,7 @@ func main() {
 	router.HandleFunc("/login", rest.LoginHandler)
 	router.HandleFunc("/products", rest.AllProducts).Methods("GET")
 	router.HandleFunc("/productAdd", rest.AddProduct).Methods("POST")
+	router.HandleFunc("/registerUser", rest.RegisterUser).Methods("POST")
 
 	http.ListenAndServe(":80",
 		handlers.CORS(

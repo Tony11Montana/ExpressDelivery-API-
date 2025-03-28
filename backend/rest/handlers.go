@@ -176,23 +176,22 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = or.AddUser(&usr)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	check, err, _ := or.CheckUser(&usr)
+	if check {
+		http.Error(w, "User have in base", http.StatusBadRequest)
 		return
 	}
 
-	/*check, err, role := or.CheckUser(&usr)
-	if err != nil || !check {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	err = or.AddUser(&usr)
+	if err != nil {
+		http.Error(w, "Unlucky try add user", http.StatusBadRequest)
 		return
 	}
-	*/
 
 	// Генерация JWT-токена
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &or.Claims{
 		Login_user: usr.Login_user,
-		Role:       usr.Role_user,
+		Role:       "client",
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
 		},

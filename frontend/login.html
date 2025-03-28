@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auth Page</title>
+    <title>ExpressDelivery</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #e3f2fd; /* Свежий голубой фон */
+            background-color: #e3f2fd;
             font-family: 'Arial', sans-serif;
         }
 
@@ -28,7 +28,7 @@
         .auth-title {
             margin-bottom: 1.5rem;
             text-align: center;
-            color: #3f51b5; /* Темно-синий цвет заголовка */
+            color: #3f51b5;
         }
 
         .tabs {
@@ -46,20 +46,20 @@
         }
 
         .input-field input {
-            border-bottom: 2px solid #3f51b5; /* Синяя линия под полями ввода */
+            border-bottom: 2px solid #3f51b5;
         }
 
         .input-field input:focus {
-            border-bottom: 2px solid #1976d2; /* Более яркая линия при фокусе */
+            border-bottom: 2px solid #1976d2;
         }
 
         .btn {
-            background-color: #3f51b5; /* Синий цвет кнопок */
+            background-color: #3f51b5;
             border-radius: 20px;
         }
 
         .btn:hover {
-            background-color: #1976d2; /* Темнее при наведении */
+            background-color: #1976d2;
         }
 
         .link-text {
@@ -81,6 +81,8 @@
 <body>
     <div class="auth-card">
         <h5 class="auth-title">ExpressDelivery</h5>
+        
+        <!-- Форма логина -->
         <div id="login" class="form-content active">
             <form id="login-form">
                 <div class="input-field">
@@ -91,36 +93,52 @@
                     <label for="login-password">Password</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" id="sign_in" class="btn waves-effect waves-light">Login</button>
+                <button type="submit" class="btn waves-effect waves-light">Login</button>
             </form>
         </div>
-
+        <!-- Форма регистрации -->
         <div id="register" class="form-content">
             <form id="registration-form">
                 <div class="input-field">
                     <label for="register-username">Username</label>
-                    <input type="text" id="register-username" required>
+                    <input type="text" id="register-username" name="login" required>
                 </div>
-
                 <div class="input-field">
                     <label for="register-password">Password</label>
-
-                    <input type="password" id="register-password" required>
+                    <input type="password" id="register-password" name="password" required>
                 </div>
                 <div class="input-field">
-                    <label for="confirm-password">Confirm Password</label>
-                    <input type="password" id="confirm-password" required>
+                    <label for="first-name">First Name</label>
+                    <input type="text" id="first-name" name="first_name" required>
+                </div>
+                <div class="input-field">
+                    <label for="last-name">Last Name</label>
+                    <input type="text" id="last-name" name="last_name" required>
+                </div>
+                <div class="input-field">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+                <div class="input-field">
+                    <label for="mobile_number">Number mobile</label>
+                    <input type="text" id="mobile_number" name="mobile_number" required>
+                </div>
+                <div class="input-field">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date_both" required>
                 </div>
                 <button type="submit" class="btn waves-effect waves-light">Register</button>
             </form>
         </div>
 
+        <!-- Переключатель форм -->
         <p class="link-text">
-            <span id="switch-text">Don't have an account? <a href="#register">Register here</a></span>
+            <span id="switch-text">Don't have an account? <a href="#register" onclick="showForm('register')">Register here</a></span>
         </p>
     </div>
 
     <script>
+        // Функция переключения форм
         function showForm(formType) {
             const loginForm = document.getElementById('login');
             const registerForm = document.getElementById('register');
@@ -129,61 +147,81 @@
 
             if (formType === 'login') {
                 loginForm.classList.add('active');
-                document.getElementById('switch-text').innerHTML = "Don't have an account? <a href='#register' onclick='showForm(\"register\")'>Register here</a>";
+                document.getElementById('switch-text').innerHTML = 
+                    "Don't have an account? <a href='#register' onclick='showForm(\"register\")'>Register here</a>";
             } else {
                 registerForm.classList.add('active');
-                document.getElementById('switch-text').innerHTML = "Already have an account? <a href='#login' onclick='showForm(\"login\")'>Login here</a>";
+                document.getElementById('switch-text').innerHTML = 
+                    "Already have an account? <a href='#login' onclick='showForm(\"login\")'>Login here</a>";
             }
         }
 
-        // Убираем подсказку при вводе
+        // Анимация полей ввода
         const inputs = document.querySelectorAll('.input-field input');
         inputs.forEach(input => {
             input.addEventListener('input', function() {
-                const label = this.previousElementSibling; // Получаем соответствующую метку
-                if (this.value) {
-                    label.classList.add('active'); // Добавляем класс для поднятия метки
-                } else {
-                    label.classList.remove('active'); // Убираем класс, если поле пустое
-                }
+                const label = this.previousElementSibling;
+                if (this.value) label.classList.add('active');
+                else label.classList.remove('active');
             });
 
             input.addEventListener('focus', function() {
-                const label = this.previousElementSibling; // Получаем соответствующую метку
-                label.classList.add('active'); // Добавляем класс для поднятия метки при фокусе
+                this.previousElementSibling.classList.add('active');
             });
 
             input.addEventListener('blur', function() {
-                const label = this.previousElementSibling; // Получаем соответствующую метку
-                if (!this.value) {
-                    label.classList.remove('active'); // Убираем класс, если поле пустое
-                }
+                if (!this.value) this.previousElementSibling.classList.remove('active');
             });
         });
-        
-    document.getElementById('login-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Предотвращаем перезагрузку страницы
 
-    const login = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
+        // Обработчик формы логина
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const login = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
 
-    fetch('http://localhost/login', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ login: login, password: password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const token = data.token;
-        // Сохранение токена в localStorage
-        localStorage.setItem('jwtToken', token);
-    })
-    .catch(error =>{ 
-    console.error('Error logging in:', error);
-    alert("Error logging in")});
-});
+            fetch('http://localhost/login', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ login, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('jwtToken', data.token);
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                alert("Login failed");
+            });
+        });
+
+        // Обработчик формы регистрации
+        document.getElementById('registration-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const login = document.getElementById('register-username').value;
+            const first_name = document.getElementById('first-name').value;
+            const last_name = document.getElementById('last-name').value;
+            const password = document.getElementById('register-password').value;
+            const mobile_number = document.getElementById('mobile_number').value;
+            const address = document.getElementById('address').value;
+            const date_both = document.getElementById('date').value;
+
+            fetch('http://localhost/registerUser', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({login,first_name,last_name,password,mobile_number,address,date_both})
+            })
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('jwtToken', data.token);
+                alert("Registration successful!");
+            })
+            .catch(error => {
+                console.error('Registration error:', error);
+                alert("Registration failed");
+            });
+        });
     </script>
 </body>
 </html>

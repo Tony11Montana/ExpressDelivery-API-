@@ -17,6 +17,11 @@ type User struct {
 	Login_user    string `json:"login"`
 	Password_user string `json:"password"`
 	Role_user     string `json:"role"`
+	First_name    string `json:"first_name"`
+	Last_name     string `json:"last_name"`
+	Date_both     string `json:"date_both"`
+	Mobile_number string `json:"mobile_number"`
+	Address       string `json:"address"`
 }
 
 func CheckUser(user *User) (bool, error, string) {
@@ -51,7 +56,8 @@ func CheckUser(user *User) (bool, error, string) {
 
 }
 func AddUser(user *User) (err error) {
-	_, err = db.Exec(`insert into Clients(login,password) values(?, ?)`, &user.Login_user, &user.Password_user)
+	_, err = db.Exec(`insert into Clients(login,password,first_name,last_name,date_both,mobile_number,address) values(?, ?, ?, ?, ?, ?, ?)`,
+		&user.Login_user, &user.Password_user, &user.First_name, &user.Last_name, &user.Date_both, &user.Mobile_number, &user.Address)
 	if err != nil {
 		log.Fatal(err)
 		return err
