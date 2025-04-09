@@ -253,4 +253,24 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Product added successfully"})
+}
+func AddOrder(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+
+	tokenString, err := GetJWTToken(&authHeader)
+	if err != nil {
+		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		return
+	}
+
+	login, role, err := ParseJWTToken(tokenString, jwtKey)
+	if err != nil {
+		http.Error(w, "Invalid authorization (JWT token end or not use)", http.StatusUnauthorized)
+		return
+	}
+
 }

@@ -32,7 +32,7 @@ function showProducts(){
         tableBody.innerHTML += `<div class="product-card">
             <div class="product-name">${product.Product_name}</div>
             <div class="product-description">${product.Product_description}</div>
-            <div class="product-price">${product.Product_price}</div> </div>`;
+            <div class="product-price">${product.Product_price}$ count: ${product.Product_count}</div> </div>`;
         });
     })
     .catch(error => console.error('Error fetching couriers:', error));
@@ -87,9 +87,7 @@ function showOrders(jsonOrders)
     table.innerHTML = tableContent; // Вставляем все строки в таблицу
 }
 
-document.getElementById('addCourierForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Предотвращаем перезагрузку страницы
-
+function addCorier(){
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
     const id_warehouse = document.getElementById('id_warehouse').value;
@@ -100,7 +98,7 @@ document.getElementById('addCourierForm').addEventListener('submit', function(ev
             'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ id_courier: 0, first_name: firstName, last_name: lastName, total_salary: 0, warehouse_name: "warehouse", id_warehouse: Number(id_warehouse)})
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, id_warehouse: Number(id_warehouse)})
     })
     .then(response => response.json())
     .then(data => {
@@ -108,15 +106,15 @@ document.getElementById('addCourierForm').addEventListener('submit', function(ev
         // Обновляем таблицу
         /*const tableBody = document.getElementById('customer-table');
         tableBody.innerHTML += `<tr><td>${firstName} ${lastName}</td> <td> ${0} </td> <td>${String(id_warehouse)}</td></tr>`;*/
+    //    alert("Courier added successfully")
         ShowCouriers()
-        alert("Courier added successfully")
     })
     .catch(error => {
-        console.error('Error adding courier:', error)
+    //    console.error('Error adding courier:', error)
         return;
     });
 
-});
+};
 
 function ShowCouriers(){
     fetch('http://localhost/couriers', {
@@ -135,3 +133,36 @@ function ShowCouriers(){
     })
     .catch(error => console.error('Error fetching couriers:', error));
 }
+
+function addProduct(){
+    const productName = document.getElementById('productName').value;
+    const productPrice = document.getElementById('productPrice').value;
+    const productDescription = document.getElementById('productDescription').value;
+    const productCount = document.getElementById('productCount').value;
+    const productWarehouse = document.getElementById('productWarehouse').value;
+
+    fetch('http://localhost/productAdd', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            product_name: productName,
+            product_price: Number(productPrice),
+            product_description: productDescription,
+            product_count: Number(productCount),
+            id_warehouse: Number(productWarehouse)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        //console.log('Product added:', data);
+        //alert("Product added successfully");
+        ShowProducts(); // Функция обновления таблицы
+    })
+    .catch(error => {
+        //console.error('Error adding product:', error);
+        //alert("Ошибка добавления продукта");
+    });
+};

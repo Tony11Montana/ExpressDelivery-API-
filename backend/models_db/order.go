@@ -7,19 +7,16 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-/*
-	type Order struct {
-		id_order          uint32
-		id_client         uint32
-		id_employee       uint32
-		id_status         uint32
-		date_order        string
-		type_pay          string
-		date_pay          string
-		description_order string
-		price_delivery    uint64
-	}
-*/
+type OrderCreate struct {
+	id_client         uint32
+	date_order        string
+	type_pay          string
+	date_pay          string
+	description_order string
+	price_delivery    uint64
+	Products_in_order []Product 
+}
+
 type Order struct {
 	Id_client       uint32 `json:"id_client"`
 	Client_name     string `json:"client_name"`

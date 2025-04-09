@@ -8,6 +8,7 @@ import (
 )
 
 type Product struct {
+	Product_id          uint8  `json:"id"`
 	Product_name        string `json: "product_name"`
 	Product_description string `json: "product_description"`
 	Product_price       int16  `json: "product_price"`
@@ -17,7 +18,7 @@ type Product struct {
 
 func GetAllProducts() ([]*Product, error) {
 
-	rows, err := db.Query(`select name_product, description_product, price_product
+	rows, err := db.Query(`select id_product, name_product, description_product, price_product, count_warehouse
 						   from products;`)
 	if err != nil {
 		log.Fatal(err)
@@ -29,9 +30,11 @@ func GetAllProducts() ([]*Product, error) {
 	for rows.Next() {
 		product := new(Product)
 		err := rows.Scan(
+			&product.Product_id,
 			&product.Product_name,
 			&product.Product_description,
-			&product.Product_price)
+			&product.Product_price,
+			&product.Product_count)
 		if err != nil {
 			return nil, err
 		}

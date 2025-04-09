@@ -63,8 +63,10 @@
             <span class="mdl-layout-title">Menu</span>
             <nav class="mdl-navigation">
                 <a class="mdl-navigation__link" href="products.html">Products</a>
+               <!-- <a class="mdl-navigation__link" href="menu-item-list-customer.html">Shops</a>-->
                 <a class="mdl-navigation__link" href="couriers.html">Couriers</a>
                 <a class="mdl-navigation__link" href="orders-index.html">Orders</a>
+                <a class="mdl-navigation__link" href="createOrder.html">Create order</a>
             </nav>
         </div>
         <main class="mdl-layout__content">
@@ -92,7 +94,7 @@
                             <input class="mdl-textfield__input" type="number" id="productWarehouse" name="productWarehouse">
                             <label class="mdl-textfield__label" for="productWarehouse">Product id warehouse</label>
                         </div>
-                        <button class="mdl-button mdl-js-button mdl-button--raised" type="submit">Add Product</button>
+                        <button class="mdl-button mdl-js-button mdl-button--raised" onclick="addProduct()">Add Product</button>
                     </form>
                     <div id="products-container">
                         <!-- Тестовые карточки -->

@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Создание заказа</title>
+    <title>Create order</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -78,58 +78,89 @@
             border-radius: 4px;
             margin-top: 15px;
         }
+        
+        .product-form {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
     </style>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link type="text/css" rel="stylesheet" href="./style/style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+        <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </head>
 <body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <span class="mdl-layout-title">ExpressDelivery</span>
+                <div class="mdl-layout-spacer"></div>
+                <nav class="mdl-navigation">
+                    <a class="mdl-navigation__link" href="">Sign in</a>
+                </nav>
+            </div>
+        </header>
+        <div class="mdl-layout__drawer">
+            <span class="mdl-layout-title">Menu</span>
+            <nav class="mdl-navigation">
+                <a class="mdl-navigation__link" href="products.html">Products</a>
+               <!-- <a class="mdl-navigation__link" href="menu-item-list-customer.html">Shops</a>-->
+                <a class="mdl-navigation__link" href="couriers.html">Couriers</a>
+                <a class="mdl-navigation__link" href="orders-index.html">Orders</a>
+                <a class="mdl-navigation__link" href="createOrder.html">Create order</a>
+            </nav>
+        </div>
+
     <div class="container">
-        <h1>Создание заказа</h1>
+        <h1>Create order</h1>
         
-        <div class="order-form">
+        <!--  <div class="order-form">
             <div class="form-group">
-                <label>Название заказа</label>
+                <label>Name of order</label>
                 <input type="text" id="orderName" placeholder="Введите название заказа">
-            </div>
+            </div> -->
             
-            <div class="form-group">
-                <label>Клиент</label>
+            <!-- <div class="form-group">
+                <label>Client</label>
                 <input type="text" id="client" placeholder="Введите имя клиента">
-            </div>
+            </div> -->
             
             <div class="form-group">
-                <label>Дата выполнения</label>
-                <input type="date" id="dueDate">
-            </div>
-            
-            <div class="form-group">
-                <label>Дата оплаты</label>
+                <label>Date payment</label>
                 <input type="date" id="paymentDate">
             </div>
             
             <div class="form-group">
-                <label>Тип оплаты</label>
+                <label>Type pay</label>
                 <select id="paymentType">
-                    <option value="">Выберите тип оплаты</option>
-                    <option value="cash">Наличные</option>
-                    <option value="card">Карта</option>
-                    <option value="transfer">Перевод</option>
+                    <option value="">Select type payment</option>
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="transfer">Transfer money</option>
                 </select>
             </div>
             
             <div class="form-group">
-                <label>Описание заказа</label>
+                <label>Description order</label>
                 <textarea id="orderDescription" rows="3"></textarea>
             </div>
             
             <div class="form-group">
-                <label>Дата создания заказа</label>
+                <label>Date create the order</label>
                 <input type="text" id="creationDate" readonly>
             </div>
             
             <div class="products-container">
-                <h3>Продукция в заказе</h3>
+                <h3>Products in order</h3>
                 <div id="productsList"></div>
                 
-                <button class="add-btn" onclick="showProductForm()">Добавить продукт</button>
+                <button class="add-btn" onclick="showProductForm()">Add product</button>
+                <button type="submit" class="add-btn" onclick="createOrder()" >Make an order</button>
             </div>
         </div>
     </div>
@@ -137,14 +168,55 @@
     <script>
         let products = [];
         const creationDateInput = document.getElementById('creationDate');
+        let productOptions = []; // Список продуктов для выбора
         
         // Установка текущей даты при загрузке страницы
         creationDateInput.value = new Date().toISOString().slice(0, 10);
 
+        // Загрузка продуктов с сервера
+        const loadProducts = () => {
+            fetch('http://localhost/products', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки товаров');
+                }
+                return response.json();
+            })
+            .then(data => {
+                productOptions = data;
+                renderProductSelect();
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки товаров:', error);
+            });
+        };
+
+        // Функция для отображения селектора продуктов
+        function renderProductSelect() {
+            const productSelect = document.getElementById('productSelect');
+            
+            productSelect.innerHTML = `
+                <option value="">Выберите продукт</option>
+                ${productOptions.map(item => 
+                    `<option value="${item.id}">${item.Product_name}</option>`
+                ).join('')}
+            `;
+        }
+
         function showProductForm() {
             const productForm = `
                 <div class="product-form">
-                    <input type="text" id="productName" placeholder="Название продукта">
+                    <select id="productSelect" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                        <option value="">Выберите продукт</option>
+                        ${productOptions.map(item => 
+                            `<option value="${item.id}">${item.Product_name}</option>`
+                        ).join('')}
+                    </select>
                     <input type="number" id="productQuantity" placeholder="Количество">
                     <button onclick="addProduct()">Добавить</button>
                 </div>
@@ -154,17 +226,29 @@
         }
 
         function addProduct() {
-            const productName = document.getElementById('productName').value;
+            const selectedProductId = Number(document.getElementById('productSelect').value);
             const productQuantity = document.getElementById('productQuantity').value;
             
-            if (productName && productQuantity) {
+            console.log(selectedProductId)
+            console.log(productQuantity)
+
+            if (selectedProductId && productQuantity) {
+                const product = productOptions.find(p => p.id === selectedProductId);
+                if (Number(product.Product_count) >= Number(productQuantity) ){
+                console.log(product)
                 products.push({
-                    name: productName,
-                    quantity: productQuantity
+                    id: selectedProductId,
+                    name: product.Product_name,
+                    quantity: productQuantity,
+                    sumPrice: product.Product_price * productQuantity
                 });
                 
                 renderProducts();
                 clearProductForm();
+            }
+            else {
+                alert(`Total goods only : ${product.Product_count}`)
+            }
             }
         }
 
@@ -172,7 +256,7 @@
             const productsHTML = products.map((product, index) => `
                 <div class="product-item">
                     <div>${product.name}</div>
-                    <div>Количество: ${product.quantity}</div>
+                    <div>Count: ${product.quantity}, Price: ${product.sumPrice}</div>
                     <button class="remove-btn" onclick="removeProduct(${index})">Удалить</button>
                 </div>
             `).join('');
@@ -188,6 +272,45 @@
             products.splice(index, 1);
             renderProducts();
         }
+        
+        // Инициализация при загрузке страницы
+        window.onload = loadProducts;
+        
+        // Обработка отправки заказа на сервер
+        function createOrder(){
+            event.preventDefault();
+            
+            const creationDate = document.getElementById('creationDate').value;
+            const paymentDate = document.getElementById('paymentDate').value;
+            const paymentType = document.getElementById('paymentType').value;
+            const orderDescription = document.getElementById('orderDescription').value;
+            
+            if (!creationDate || !paymentDate || !paymentType) {
+                alert('Пожалуйста, заполните все обязательные поля.');
+                return;
+            }
+
+            fetch('http://localhost/orders', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    creationDate,
+                    paymentDate,
+                    paymentType,
+                    orderDescription,
+                    products
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Заказ создан:', data);
+                alert('Заказ успешно создан!');
+            })
+            .catch(error => console.error('Ошибка создания заказа:', error));
+        };
     </script>
 </body>
 </html>
