@@ -14,8 +14,11 @@ func main() {
 
 	db.InitDB("root:admin@tcp(127.0.0.1:3306)/Elagin")
 
+	//db.InitDB("root:admin@tcp(database)/Elagin")
+
 	router := mux.NewRouter()
 	router.HandleFunc("/orders", rest.AllOrder).Methods("GET")
+	router.HandleFunc("/orders", rest.AddOrder).Methods("POST")
 	router.HandleFunc("/couriers", rest.AllCouriers).Methods("GET")
 	router.HandleFunc("/courierAdd", rest.AddCourier).Methods("POST")
 	router.HandleFunc("/login", rest.LoginHandler)
@@ -23,7 +26,7 @@ func main() {
 	router.HandleFunc("/productAdd", rest.AddProduct).Methods("POST")
 	router.HandleFunc("/registerUser", rest.RegisterUser).Methods("POST")
 
-	http.ListenAndServe(":80",
+	http.ListenAndServe(":8080",
 		handlers.CORS(
 			handlers.AllowedOrigins([]string{"*"}),
 			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),

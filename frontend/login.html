@@ -180,7 +180,7 @@
             const login = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
 
-            fetch('http://localhost/login', {
+            fetch('http://localhost:8080/login', {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ login, password })
@@ -188,6 +188,7 @@
             .then(response => response.json())
             .then(data => {
                 localStorage.setItem('jwtToken', data.token);
+                window.location.href = 'orders-index.html';
             })
             .catch(error => {
                 console.error('Login error:', error);
@@ -207,7 +208,7 @@
             const address = document.getElementById('address').value;
             const date_both = document.getElementById('date').value;
 
-            fetch('http://localhost/registerUser', {
+            fetch('http://localhost:8080/registerUser', {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({login,first_name,last_name,password,mobile_number,address,date_both})

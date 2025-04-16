@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -259,6 +260,7 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "Product added successfully"})
 }
 func AddOrder(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	authHeader := r.Header.Get("Authorization")
 
 	tokenString, err := GetJWTToken(&authHeader)
@@ -273,4 +275,33 @@ func AddOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if role != "client" {
+		http.Error(w, "Invalid authorization ( not enough rights, u not client )", http.StatusUnauthorized)
+		return
+	}
+
+	bodyData, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+
+	defer r.Body.Close()
+
+	var creatOrd or.OrderCreate
+	err = json.Unmarshal([]byte(bodyData), &creatOrd)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(creatOrd)
+
+	err = or.CreateOrder(&login, &creatOrd)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Order added successfully"})
 }

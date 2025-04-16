@@ -8,18 +8,19 @@ import (
 )
 
 type Product struct {
-	Product_id          uint8  `json:"id"`
-	Product_name        string `json: "product_name"`
-	Product_description string `json: "product_description"`
-	Product_price       int16  `json: "product_price"`
-	Product_count       uint8  `json: "product_count"`
-	Id_warehouse        uint8  `json:"id_warehouse"`
+	Product_id          uint8   `json:"id"`
+	Product_name        string  `json: "product_name"`
+	Product_description string  `json: "product_description"`
+	Product_price       float32 `json: "product_price"`
+	Product_count       uint8   `json: "product_count"`
+	Id_warehouse        uint8   `json:"id_warehouse"`
 }
 
 func GetAllProducts() ([]*Product, error) {
 
-	rows, err := db.Query(`select id_product, name_product, description_product, price_product, count_warehouse
-						   from products;`)
+	//rows, err := db.Query(`select id_product, name_product, description_product, price_product, count_warehouse from products;`)
+	rows, err := db.Query(`select id_product, name_product, description_product, AVG(price_product), sum(count_warehouse) 
+						   from products GROUP BY id_product, name_product, description_product;`)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('jwtToken') !== null)
             startDate();
         else {
-            window.location.href = 'login.html'
+            window.location.href = 'login.html';
         }
 
     }
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 let orders = [];
 
 function showProducts(){
-    fetch('http://localhost/products', {
+    fetch('http://localhost:8080/products', {
         method: 'GET',
         headers: {
             "Content-Type": "application/json"
@@ -47,7 +47,7 @@ function startDate(){
             "Content-Type": "application/json"
         },
     }; 
-    fetch('http://localhost/orders', options)
+    fetch('http://localhost:8080/orders', options)
     .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -92,7 +92,7 @@ function addCorier(){
     const lastName = document.getElementById('lastName').value;
     const id_warehouse = document.getElementById('id_warehouse').value;
     
-    fetch('http://localhost/courierAdd', {
+    fetch('http://localhost:8080/courierAdd', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
@@ -141,7 +141,7 @@ function addProduct(){
     const productCount = document.getElementById('productCount').value;
     const productWarehouse = document.getElementById('productWarehouse').value;
 
-    fetch('http://localhost/productAdd', {
+    fetch('http://localhost:8080/productAdd', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,

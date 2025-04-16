@@ -101,7 +101,7 @@
                 <span class="mdl-layout-title">ExpressDelivery</span>
                 <div class="mdl-layout-spacer"></div>
                 <nav class="mdl-navigation">
-                    <a class="mdl-navigation__link" href="">Sign in</a>
+                    <a class="mdl-navigation__link" href="login.html">Sign in</a>
                 </nav>
             </div>
         </header>
@@ -175,7 +175,7 @@
 
         // Загрузка продуктов с сервера
         const loadProducts = () => {
-            fetch('http://localhost/products', {
+            fetch('http://localhost:8080/products', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -238,9 +238,9 @@
                 console.log(product)
                 products.push({
                     id: selectedProductId,
-                    name: product.Product_name,
-                    quantity: productQuantity,
-                    sumPrice: product.Product_price * productQuantity
+                    product_name: product.Product_name,
+                    product_count: Number(productQuantity),
+                    product_price: product.Product_price
                 });
                 
                 renderProducts();
@@ -255,8 +255,8 @@
         function renderProducts() {
             const productsHTML = products.map((product, index) => `
                 <div class="product-item">
-                    <div>${product.name}</div>
-                    <div>Count: ${product.quantity}, Price: ${product.sumPrice}</div>
+                    <div>${product.product_name}</div>
+                    <div>Count: ${product.product_count}, Price: ${product.product_price}</div>
                     <button class="remove-btn" onclick="removeProduct(${index})">Удалить</button>
                 </div>
             `).join('');
@@ -290,7 +290,7 @@
                 return;
             }
 
-            fetch('http://localhost/orders', {
+            fetch('http://localhost:8080/orders', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
@@ -308,6 +308,7 @@
             .then(data => {
                 console.log('Заказ создан:', data);
                 alert('Заказ успешно создан!');
+                window.location.href = 'orders-index.html';
             })
             .catch(error => console.error('Ошибка создания заказа:', error));
         };
