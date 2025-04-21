@@ -79,6 +79,24 @@ func AllOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func AllCouriers(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+
+	tokenString, err := GetJWTToken(&authHeader)
+	if err != nil {
+		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		return
+	}
+
+	_, role, err := ParseJWTToken(tokenString, jwtKey)
+	if err != nil {
+		http.Error(w, "Invalid authorization (JWT token end or not use)", http.StatusUnauthorized)
+		return
+	}
+
+	if role == "client" {
+		http.Error(w, "Invalid authorization ( not enough rights )", http.StatusUnauthorized)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	//w.Header().Set("Content-Type", "text/plain")

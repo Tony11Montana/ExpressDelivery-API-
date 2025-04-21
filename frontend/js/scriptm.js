@@ -117,10 +117,11 @@ function addCorier(){
 };
 
 function ShowCouriers(){
-    fetch('http://localhost/couriers', {
+    fetch('http://localhost:8080/couriers', {
         method: 'GET',
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
         }
     })
     .then(response => response.json())

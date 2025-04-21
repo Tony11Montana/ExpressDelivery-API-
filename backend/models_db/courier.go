@@ -7,33 +7,27 @@ import (
 )
 
 type Courier struct {
-	Id_courier     uint16 `json:"id_courier"`
-	First_name     string `json:"first_name"`
-	Last_name      string `json:"last_name"`
-	Total_salary   uint32 `json:"total_salary"`
-	Warehouse_name string `json:"warehouse_name"`
-	Id_warehouse   uint8  `json:"id_warehouse"`
+	Id_courier     uint16  `json:"id_courier"`
+	First_name     string  `json:"first_name"`
+	Last_name      string  `json:"last_name"`
+	Total_salary   float32 `json:"total_salary"`
+	Warehouse_name string  `json:"warehouse_name"`
+	Id_warehouse   uint8   `json:"id_warehouse"`
 }
 
 func GetAllCouriers() ([]*Courier, error) {
 
-	rows, err := db.Query(`SELECT subQueryCourier.id_courier, first_name, last_name, ifnull(sum(price_delivery), 0) as total_salary,
-	                       ifnull(name_warehouse, "-") as name_warehouse, ifnull(subQueryCourier.id_warehouse, 0) as id_warehouse				   
-						   from (
-						   Select Couriers.id_courier, Couriers.first_name, Couriers.last_name, warehouses.name_warehouse, warehouses.id_warehouse 
-						   from couriers left join warehouses on
-						   couriers.id_warehouse = warehouses.id_warehouse
-						   ) as subQueryCourier left JOIN (
-						   SELECT Orders.price_delivery, Info_orders.id_order, Info_orders.id_courier  
-						   FROM Orders INNER JOIN Info_orders
-						   ON Orders.id_order = Info_orders.id_order) as subQuery
-						   ON subQueryCourier.id_courier = subQuery.id_courier
-						   GROUP BY 
-						   first_name, 
-						   last_name,
-						   Couriers.id_courier,
-						   name_warehouse,
-                           id_warehouse`)
+	rows, err := db.Query(`select id_courier,first_name,last_name,sum(total_sum),warehouses.name_warehouse, warehouses.id_warehouse
+							from
+							(select couriers.id_courier,couriers.first_name, couriers.last_name, ifnull(round(info_orders.price * 0.2, 2), 0) as total_sum, couriers.id_warehouse
+							from info_orders right join couriers 
+							on info_orders.id_courier = couriers.id_courier) as couriers inner join warehouses on couriers.id_warehouse = warehouses.id_warehouse
+							group by
+							id_courier,
+							first_name,
+							last_name,
+							id_warehouse,
+							name_warehouse`)
 	if err != nil {
 		log.Fatal(err)
 	}
