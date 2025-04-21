@@ -217,6 +217,7 @@
             .then(data => {
                 localStorage.setItem('jwtToken', data.token);
                 alert("Registration successful!");
+                window.location.href = 'orders-index.html';
             })
             .catch(error => {
                 console.error('Registration error:', error);

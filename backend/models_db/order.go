@@ -20,45 +20,39 @@ type OrderCreate struct {
 }
 
 type Order struct {
-	Id_client       uint32 `json:"id_client"`
-	Client_name     string `json:"client_name"`
-	Price_delivery  uint32 `json:"price_delivery"`
-	Type_pay        string `json:"type_pay"`
-	Date_pay        string `json:"date_pay"`
-	Date_order      string `json:"date_order"`
-	Courier_name    string `json:"courier_name"`
-	Count_product   uint64 `json:"count_product"`
-	Price_product   uint64 `json:"price_product"`
-	Name_product    string `json:"name_product"`
-	Count_warehouse uint32 `json:"count_warehouse"`
+	Id_client       uint32  `json:"id_client"`
+	Client_name     string  `json:"client_name"`
+	Price_delivery  float32 `json:"price_delivery"`
+	Type_pay        string  `json:"type_pay"`
+	Date_pay        string  `json:"date_pay"`
+	Date_order      string  `json:"date_order"`
+	Courier_name    string  `json:"courier_name"`
+	Count_product   uint64  `json:"count_product"`
+	Price_product   float32 `json:"price_product"`
+	Name_product    string  `json:"name_product"`
+	Count_warehouse uint32  `json:"count_warehouse"`
 }
 
 func GetAllOrder(login *string, role *string) ([]*Order, error) {
 	var rows *sql.Rows
 	var err error
 
-	querydb := `SELECT Orders_new.id_client, concat(Clients.first_name," " ,Clients.last_name) as client_name,
-						Orders_new.price_delivery, Orders_new.type_pay, Orders_new.date_pay, Orders_new.date_order,
-						Orders_new.CourierName as courier_name, Orders_new.count_product, Orders_new.price as price_product,
-						Orders_new.name_product, Orders_new.count_warehouse
-						from (
-						select Orders.id_client, Orders.price_delivery, Orders.type_pay, Orders.date_pay, Orders.date_order,
-						info_cour.CourierName, info_cour.count_product, info_cour.price,
-						info_cour.name_product, info_cour.count_warehouse
-						from Orders inner join (
-						select concat(Couriers.first_name, " " , Couriers.last_name) as CourierName,
-						Info_orders_new.count_product, Info_orders_new.price, Info_orders_new.id_order,
-						Info_orders_new.name_product, Info_orders_new.count_warehouse
-						from (select Info_orders.id_courier, Info_orders.count_product, Info_orders.price, Info_orders.id_order,
-						Products.name_product, Products.count_warehouse
-						from Info_orders INNER join Products
-						) as Info_orders_new INNER JOIN Couriers ON Info_orders_new.id_courier = Couriers.id_courier
-						) as info_cour ON Orders.id_order = info_cour.id_order
-						) as Orders_new INNER JOIN Clients ON
-						Orders_new.id_client = Clients.id_client`
+	querydb := `SELECT date_create,date_pay,type_pay,fio,name_product,count_product,price,count_warehouse,fioCourier,priceDelivery
+				FROM
+				(SELECT orders.*, products.name_product,products.id_warehouse, products.count_warehouse
+				FROM 
+				(SELECT orders.*, concat(couriers.first_name, " ", couriers.last_name) as fioCourier
+				from
+				(select orders.*, concat(clients.first_name, " ", clients.last_name) as fio, clients.login
+				from
+				(select date_create,date_pay,type_pay,id_client as id_client,id_product,count_product,price,id_courier,round((info_orders.price * 0.2), 2) as priceDelivery
+				from info_orders inner join orders 
+				ON info_orders.id_order = orders.id_order) as orders INNER JOIN clients
+				ON orders.id_client = clients.id_client) as orders inner join couriers ON orders.id_courier = couriers.id_courier) as orders INNER JOIN products
+				ON orders.id_product = products.id_product ) as orders INNER JOIN warehouses ON orders.id_warehouse = warehouses.id_warehouse`
 
 	if *role == "client" {
-		querydb = querydb + ` where clients.login = ?`
+		querydb = querydb + ` where login = ?`
 		rows, err = db.Query(querydb, &login)
 	} else {
 		rows, err = db.Query(querydb)
@@ -74,17 +68,16 @@ func GetAllOrder(login *string, role *string) ([]*Order, error) {
 	for rows.Next() {
 		order := new(Order)
 		err := rows.Scan(
-			&order.Id_client,
-			&order.Client_name,
-			&order.Price_delivery,
-			&order.Type_pay,
-			&order.Date_pay,
 			&order.Date_order,
-			&order.Courier_name,
+			&order.Date_pay,
+			&order.Type_pay,
+			&order.Client_name,
+			&order.Name_product,
 			&order.Count_product,
 			&order.Price_product,
-			&order.Name_product,
-			&order.Count_warehouse)
+			&order.Count_warehouse,
+			&order.Courier_name,
+			&order.Price_delivery)
 		if err != nil {
 			return nil, err
 		}
@@ -177,6 +170,7 @@ func CreateOrder(login *string, order *OrderCreate) error {
 	if err != nil {
 		return err
 	}
+	var sum_orders float32
 
 	fmt.Println("OrderPage", order.Products_in_order[0].Product_count)
 	//seach courier of warehouse and few work. ( for each item ) and create info_orders
@@ -246,6 +240,7 @@ func CreateOrder(login *string, order *OrderCreate) error {
 				if err != nil {
 					return err
 				}
+				sum_orders += product_price
 				break
 			} else if countProduct < 0 {
 				_, err = db.Exec(`update products set count_warehouse = ? where name_product = ? and id_warehouse=?`,
@@ -259,11 +254,18 @@ func CreateOrder(login *string, order *OrderCreate) error {
 				if err != nil {
 					return err
 				}
+				sum_orders += product_price
 				countProduct = -countProduct
 			}
 
 		}
 		fmt.Println(string(product.Product_id), product.Product_name)
+	}
+	sum_orders *= 0.2 // 20% total sum
+
+	_, err = db.Exec(`update orders set price_delivery = ? where id_order = ?`, &sum_orders, &order.Id_order)
+	if err != nil {
+		return err
 	}
 
 	return nil

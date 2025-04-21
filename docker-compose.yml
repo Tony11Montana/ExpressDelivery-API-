@@ -18,3 +18,11 @@ services:
       - '8080:8080'
     depends_on:
       - database
+  frontend:
+    image: nginx:alpine
+    ports:
+      - '80:80'
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend

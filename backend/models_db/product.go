@@ -8,19 +8,25 @@ import (
 )
 
 type Product struct {
-	Product_id          uint8   `json:"id"`
+	Product_id          uint32   `json:"id"`
 	Product_name        string  `json: "product_name"`
 	Product_description string  `json: "product_description"`
 	Product_price       float32 `json: "product_price"`
-	Product_count       uint8   `json: "product_count"`
+	Product_count       uint64  `json: "product_count"`
 	Id_warehouse        uint8   `json:"id_warehouse"`
 }
 
 func GetAllProducts() ([]*Product, error) {
 
 	//rows, err := db.Query(`select id_product, name_product, description_product, price_product, count_warehouse from products;`)
-	rows, err := db.Query(`select id_product, name_product, description_product, AVG(price_product), sum(count_warehouse) 
-						   from products GROUP BY id_product, name_product, description_product;`)
+	rows, err := db.Query(`select 0 as id_product, allProducts.name_product, allProducts.description_product,
+							round(sum((allProducts.count_warehouse / AllCount.allCount * allProducts.price_product)),2) as price, 
+							AllCount.allCount
+							from (select * from products) as allProducts inner join (select name_product, sum(count_warehouse) as allCount
+							from products 
+							GROUP BY name_product, description_product) as AllCount
+							on allProducts.name_product = AllCount.name_product
+							group by allProducts.name_product, AllCount.allCount,allProducts.description_product`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,6 +34,8 @@ func GetAllProducts() ([]*Product, error) {
 
 	products := make([]*Product, 0)
 
+	var i uint32
+	i = 1
 	for rows.Next() {
 		product := new(Product)
 		err := rows.Scan(
@@ -39,7 +47,9 @@ func GetAllProducts() ([]*Product, error) {
 		if err != nil {
 			return nil, err
 		}
+		product.Product_id = i
 		products = append(products, product)
+		i++
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
