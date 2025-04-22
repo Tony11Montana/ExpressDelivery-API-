@@ -1,7 +1,7 @@
 package models_db
 
 import (
-	"errors"
+	"fmt"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -19,14 +19,19 @@ type Product struct {
 func GetAllProducts() ([]*Product, error) {
 
 	//rows, err := db.Query(`select id_product, name_product, description_product, price_product, count_warehouse from products;`)
-	rows, err := db.Query(`select 0 as id_product, allProducts.name_product, allProducts.description_product,
-							round(sum((allProducts.count_warehouse / AllCount.allCount * allProducts.price_product)),2) as price, 
-							AllCount.allCount
-							from (select * from products) as allProducts inner join (select name_product, sum(count_warehouse) as allCount
-							from products 
-							GROUP BY name_product, description_product) as AllCount
-							on allProducts.name_product = AllCount.name_product
-							group by allProducts.name_product, AllCount.allCount,allProducts.description_product`)
+
+	/*rows, err := db.Query(`select 0 as id_product, allProducts.name_product, allProducts.description_product,
+	round(sum((allProducts.count_warehouse / AllCount.allCount * allProducts.price_product)),2) as price,
+	AllCount.allCount
+	from (select * from products) as allProducts inner join (select name_product, sum(count_warehouse) as allCount
+	from products
+	GROUP BY name_product, description_product) as AllCount
+	on allProducts.name_product = AllCount.name_product
+	group by allProducts.name_product, AllCount.allCount,allProducts.description_product`)*/
+	rows, err := db.Query(`SELECT 0,name_product, description_product, price_product, sum(count_warehouse) as count
+							FROM products
+							group by 
+							name_product, description_product, price_product`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +65,9 @@ func AddProduct(pr *Product) error {
 
 	// Check current product.
 
-	rows, err := db.Query(`select name_product, id_warehouse from Products where name_product = ? AND id_warehouse = ? `, &pr.Product_name, &pr.Id_warehouse)
+	//rows, err := db.Query(`select name_product, id_warehouse from Products where name_product = ? AND id_warehouse = ? AND description_product = ?`, &pr.Product_name, &pr.Id_warehouse, &pr.Product_description)
+
+	rows, err := db.Query(`select count_warehouse, price_product from Products where name_product = ? AND id_warehouse = ? AND description_product = ?`, &pr.Product_name, &pr.Id_warehouse, &pr.Product_description)
 
 	if err != nil {
 		log.Fatal(err)
@@ -73,7 +80,64 @@ func AddProduct(pr *Product) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return nil
+		//return nil
+	} else {
+		var countProduct uint64
+		var priceProduct float32
+		//for rows.Next() {
+		err := rows.Scan(&countProduct, &priceProduct)
+		if err != nil {
+			return err
+		}
+		pr.Product_count += countProduct
+		//}
+		if err = rows.Err(); err != nil {
+			return err
+		}
+
+		// average price in warehouse.
+		newProductPrice := (priceProduct*float32(countProduct) + (float32(pr.Product_count)-float32(countProduct))*float32(pr.Product_price)) / float32(pr.Product_count)
+		//
+
+		fmt.Println(newProductPrice)
+		fmt.Println(countProduct)
+		fmt.Println(pr.Product_count)
+
+		_, err = db.Exec(`update products set count_warehouse = ?, price_product = ?  where name_product = ? and id_warehouse=? AND description_product = ? `,
+			&pr.Product_count, &newProductPrice, &pr.Product_name, &pr.Id_warehouse, &pr.Product_description)
+		if err != nil {
+			return err
+		}
+		//return errors.New("This product already exists. You replenished count!")
 	}
-	return errors.New("This product already exists.")
+
+	var avePrice float32
+
+	rows, err = db.Query(`select round(sum((allProducts.count_warehouse / AllCount.allCount * allProducts.price_product)),2) as price
+							from (select * from products) as allProducts inner join (select name_product, sum(count_warehouse) as allCount
+							from products 
+							GROUP BY name_product, description_product) as AllCount
+							on allProducts.name_product = AllCount.name_product
+							group by allProducts.name_product, AllCount.allCount,allProducts.description_product
+							having name_product = ? and description_product = ?`, &pr.Product_name, &pr.Product_description)
+	defer rows.Close()
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		err = rows.Scan(&avePrice)
+		if err != nil {
+			return err
+		}
+
+	}
+	if err = rows.Err(); err != nil {
+		return err
+	}
+	_, err = db.Exec(`update products set price_product = ? where name_product = ? AND description_product = ? `,
+		&avePrice, &pr.Product_name, &pr.Product_description)
+	if err != nil {
+		return err
+	}
+	return nil
 }
