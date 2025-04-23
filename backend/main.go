@@ -12,9 +12,9 @@ import (
 
 func main() {
 
-	db.InitDB("root:admin@tcp(127.0.0.1:3306)/Elagin")
+	//db.InitDB("root:admin@tcp(127.0.0.1:3306)/Elagin")
 
-	//db.InitDB("root:admin@tcp(database)/Elagin")
+	db.InitDB("root:admin@tcp(database)/Elagin")
 
 	router := mux.NewRouter()
 	router.HandleFunc("/orders", rest.AllOrder).Methods("GET")

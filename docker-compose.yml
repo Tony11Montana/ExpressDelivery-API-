@@ -12,17 +12,15 @@ services:
       - '3306:3306' # my local port : container port
     volumes:
       - ./database/mysql-data:/var/lib/mysql # saving dump
+  frontend:
+    build: ./frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - database
   backend:
     build: ./backend
     ports:
       - '8080:8080'
     depends_on:
-      - database
-  frontend:
-    image: nginx:alpine
-    ports:
-      - '80:80'
-    volumes:
-      - ./frontend:/app
-    depends_on:
-      - backend
+      - frontend
