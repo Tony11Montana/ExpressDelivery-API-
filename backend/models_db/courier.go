@@ -1,6 +1,7 @@
 package models_db
 
 import (
+	"database/sql"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -15,9 +16,24 @@ type Courier struct {
 	Id_warehouse   uint8   `json:"id_warehouse"`
 }
 
-func GetAllCouriers() ([]*Courier, error) {
+func GetAllCouriers(login *string, role *string) ([]*Courier, error) {
+	var rows *sql.Rows
+	var err error
 
-	rows, err := db.Query(`select id_courier,first_name,last_name,sum(total_sum),warehouses.name_warehouse, warehouses.id_warehouse
+	if *role == "courier" {
+		rows, err = db.Query(`select id_courier,first_name,last_name,sum(total_sum),warehouses.name_warehouse, warehouses.id_warehouse
+							from
+							(select couriers.id_courier,couriers.first_name, couriers.last_name, ifnull(round(info_orders.price * 0.2, 2), 0) as total_sum, couriers.id_warehouse
+							from info_orders right join couriers 
+							on info_orders.id_courier = couriers.id_courier where login = ?) as couriers inner join warehouses on couriers.id_warehouse = warehouses.id_warehouse
+							group by
+							id_courier,
+							first_name,
+							last_name,
+							id_warehouse,
+							name_warehouse`, &login)
+	} else {
+		rows, err = db.Query(`select id_courier,first_name,last_name,sum(total_sum),warehouses.name_warehouse, warehouses.id_warehouse
 							from
 							(select couriers.id_courier,couriers.first_name, couriers.last_name, ifnull(round(info_orders.price * 0.2, 2), 0) as total_sum, couriers.id_warehouse
 							from info_orders right join couriers 
@@ -28,6 +44,7 @@ func GetAllCouriers() ([]*Courier, error) {
 							last_name,
 							id_warehouse,
 							name_warehouse`)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -54,6 +54,20 @@ func GetAllOrder(login *string, role *string) ([]*Order, error) {
 	if *role == "client" {
 		querydb = querydb + ` where login = ?`
 		rows, err = db.Query(querydb, &login)
+	} else if *role == "courier" {
+		rows, err = db.Query(`SELECT date_create,date_pay,type_pay,fio,name_product,count_product,price,count_warehouse,fioCourier,priceDelivery
+								FROM
+								(SELECT orders.*, products.name_product,products.id_warehouse, products.count_warehouse
+								FROM 
+								(SELECT orders.*, concat(couriers.first_name, " ", couriers.last_name) as fioCourier
+								from
+								(select orders.*, concat(clients.first_name, " ", clients.last_name) as fio, clients.login
+								from
+								(select date_create,date_pay,type_pay,id_client as id_client,id_product,count_product,price,id_courier,round((info_orders.price * 0.2), 2) as priceDelivery
+								from info_orders inner join orders 
+								ON info_orders.id_order = orders.id_order) as orders INNER JOIN clients
+								ON orders.id_client = clients.id_client) as orders inner join couriers ON orders.id_courier = couriers.id_courier where couriers.login = ?) as orders INNER JOIN products
+								ON orders.id_product = products.id_product ) as orders INNER JOIN warehouses ON orders.id_warehouse = warehouses.id_warehouse`, &login)
 	} else {
 		rows, err = db.Query(querydb)
 	}

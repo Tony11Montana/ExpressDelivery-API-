@@ -31,7 +31,10 @@ func CheckUser(user *User) (bool, error, string) {
 							from clients 
 							union all 
 							select login, password, role 
-							from employees) as Users
+							from employees
+							union all
+							select login, password, role
+							from couriers) as Users
 							where login = ? and password = ?`, &user.Login_user, &user.Password_user)
 	if err != nil {
 		log.Fatal(err)

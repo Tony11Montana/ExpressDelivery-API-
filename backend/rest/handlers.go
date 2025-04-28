@@ -16,7 +16,7 @@ import (
 
 var jwtKey = []byte("Elagin_diplom")
 
-func ParseJWTToken(tokenString string, signingKey []byte) (string, string, error) {
+func ParseJWTToken(tokenString string, signingKey []byte) (login string, role string, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &or.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing mwthod : %v", token.Header["alg"])
@@ -87,7 +87,7 @@ func AllCouriers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, role, err := ParseJWTToken(tokenString, jwtKey)
+	login, role, err := ParseJWTToken(tokenString, jwtKey)
 	if err != nil {
 		http.Error(w, "Invalid authorization (JWT token end or not use)", http.StatusUnauthorized)
 		return
@@ -101,7 +101,7 @@ func AllCouriers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//w.Header().Set("Content-Type", "text/plain")
 
-	couriers, err := or.GetAllCouriers()
+	couriers, err := or.GetAllCouriers(&login, &role)
 
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
@@ -131,7 +131,7 @@ func AddCourier(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if role == "client" {
+	if role != "manager" {
 		http.Error(w, "Invalid authorization ( not enough rights )", http.StatusUnauthorized)
 		return
 	}
