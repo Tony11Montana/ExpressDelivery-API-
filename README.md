@@ -3,7 +3,7 @@ Hi For start services you need have:
 - Git Bash console or standart console of OS (powershell, bash, sh and etc.)
 
 if you had is this instruments, then :
-1) git clone https://github.com/Tony11Montana/ExpressDelivery-API-/tree/versionLast
+1) git clone https://github.com/Tony11Montana/ExpressDelivery-API-
 2) docker-compose up
 service ports:
 fronted - 80
